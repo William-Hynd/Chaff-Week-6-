@@ -12,20 +12,21 @@ knitr::opts_chunk$set(echo = FALSE,
                       fig.retina = 3)
 ```
 
-#Install Tidy verse
+
 ```{r packages}
+#Install Tidy verse
 library(tidyverse)
 ```
 
-#Introduction
-#Welcome to the R party
+Introduction
+Welcome to the R party
 
-#Methods
-#This is a method
+Methods
+This is a method
 
-#Results
+Results
 
-#Discussion 
+Discussion 
 
 
 
@@ -35,9 +36,73 @@ library(tidyverse)
 Chaff_Raw <- read_table2("chaff.txt")
 
 #Tidy Data
+Chaff_Tidy <- Chaff_Raw %>%
+  gather(key = sex, value = mass) 
+
+TidyData <- function(df, measure, group) {
+  gather(key = {{group}}, value = {{measure}})
+}
+
+TidyData(Chaff_Raw, mass, sex)
+```
+
+
+```{r}
+#Creating a function to find the Mean
+sum_sq <- function(df, measure) {
+  df %>% summarise(ss = sum(({{measure}} - mean({{measure}}))^2))
+}
+
+sum_sq(Chaff_Tidy, mass)
+
+#To Allow analysis of both variables (Sex and Mass) we must use a pipeline. Here we can use {{}} to separate and specify the groups at separate stages. This is used to account for tidyverse's use of 'tidy evaluation'. 
+
+sum_sq2 <- function(df, measure, group) {
+  df %>% group_by({{ group }}) %>% 
+    summarise(ss = sum(({{measure}} - mean({{measure}}))^2))
+}
+
+sum_sq2(Chaff_Tidy, mass, sex)
+```
+
+```{r}
+#Summarize Data set
+
+Chaff_Sum <- Chaff_Tidy %>% 
+  group_by(sex) %>% 
+  summarise(mean_max = mean(mass),
+            n = length(mass),
+            Sd = sd(mass),
+            Se = plotrix::std.error(mass))
+
+
+data_Summarise <- function(df, measure, group) {
+  df %>% group_by({{group}}) %>% 
+  summarise(mean_value = mean({{measure}}),
+            n = length({{measure}}),
+            Sd_max = sd({{measure}}),
+              Se_max = plotrix::std.error({{measure}}))
+}
+
+data_Summarise(Chaff_Tidy, mass, sex)
+```
+
+#Task 2
+```{r}
+#Read in data 
+Mesen_Raw <- read_table2("https://3mmarand.github.io/BIO00058M-Data-science-2020/data-raw/Y101_Y102_Y201_Y202_Y101-5.csv")
+#Tidy data set
+
 
 
 
 
 ```
+
+
+
+
+
+
+
 
